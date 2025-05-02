@@ -2,24 +2,28 @@
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
-# Mock for now - we'd implement real AI integrations later
-# from langchain.document_loaders import PyPDFLoader
-# import google.generativeai as genai
+import google.generativeai as genai
+import PyPDF2
 
 app = Flask(__name__)
 CORS(app)  # Enable CORS for all routes
 
+# Initialize Gemini API with placeholder API key
+# You'll replace "abcd" with your actual API key later
+gemini_api_key = "abcd"
+genai.configure(api_key=gemini_api_key)
+
 @app.route('/api/chat', methods=['POST'])
 def chat():
     """
-    Process a chat message and return an AI response
+    Process a chat message and return an AI response using Gemini
     """
     data = request.json
     user_message = data.get('message', '')
     settings = data.get('settings', {})
     
-    # This is a mock implementation - would be replaced with actual AI call
-    response = get_ai_response(user_message, settings)
+    # Process with Gemini API
+    response = get_gemini_response(user_message, settings)
     
     return jsonify(response)
 
@@ -43,8 +47,11 @@ def upload_pdf():
         os.makedirs('temp_uploads', exist_ok=True)
         file.save(file_path)
         
-        # Process PDF - in a real implementation, this would extract text and store it
-        pdf_id = process_pdf(file_path, filename)
+        # Extract text from PDF
+        pdf_text = extract_text_from_pdf(file_path)
+        pdf_id = f"pdf-{os.urandom(4).hex()}"
+        
+        # In a real implementation, you would store this text for RAG
         
         return jsonify({
             'id': pdf_id,
@@ -67,77 +74,114 @@ def export_conversation():
     # For now, we'll just acknowledge the request
     return jsonify({'success': True, 'message': 'Export successful'})
 
-def get_ai_response(question, settings):
+def get_gemini_response(question, settings):
     """
-    Mock function to generate AI responses
-    In a real implementation, this would use Gemini API or other LLM
+    Generate a response using the Gemini model
     """
-    # Sample response structure that matches your frontend expectations
-    response = {
-        'id': f'ai-{os.urandom(4).hex()}',
-        'type': 'ai',
-        'content': '',
-        'timestamp': '',
-    }
+    # Create an ID for this message
+    response_id = f'ai-{os.urandom(4).hex()}'
     
-    # Simple logic for demo purposes
-    if 'photosynthesis' in question.lower():
-        response['content'] = "Photosynthesis is the process where plants convert sunlight into energy. They use carbon dioxide and water to create glucose (sugar) and oxygen."
-        response['steps'] = [
-            "Light is absorbed by chlorophyll in the chloroplasts",
-            "Water molecules are split, releasing oxygen",
-            "Carbon dioxide is converted into glucose using the captured light energy",
-            "Oxygen is released as a byproduct"
-        ]
-        response['sources'] = [
-            {"title": "Biology Online Textbook", "url": "#", "description": "Chapter 4: Plant Processes"},
-            {"title": "National Geographic: Photosynthesis", "url": "#"}
-        ]
-    elif 'quadratic' in question.lower():
-        response['content'] = "Quadratic equations are in the form ax² + bx + c = 0. You can solve them using the quadratic formula: x = (-b ± √(b² - 4ac)) / 2a"
-        response['steps'] = [
-            "Ensure your equation is in the standard form: ax² + bx + c = 0",
-            "Identify the values of a, b, and c",
-            "Substitute these values into the quadratic formula: x = (-b ± √(b² - 4ac)) / 2a",
-            "Calculate the discriminant (b² - 4ac)",
-            "Find both solutions by using the + and - versions of the formula"
-        ]
-        response['sources'] = [
-            {"title": "Khan Academy: Quadratic Formula", "url": "#"},
-            {"title": "Mathematics Textbook", "url": "#", "description": "Chapter 7: Quadratic Equations"}
-        ]
-    else:
-        response['content'] = f"I understand your question about '{question}'. Let me provide a structured explanation."
-        response['steps'] = [
-            "First, let's understand the basic concept",
-            "Next, let's look at the key principles",
-            "Finally, let's examine practical applications"
-        ]
-        response['sources'] = [
-            {"title": "Academic Resource 1", "url": "#"},
-            {"title": "Educational Journal", "url": "#", "description": "Volume 34, Issue 2"}
-        ]
+    try:
+        # Configure the model based on settings
+        model = genai.GenerativeModel('gemini-1.5-pro-latest')
+        
+        # Create a system prompt based on settings
+        system_prompt = "You are a helpful study assistant that provides accurate, educational responses."
+        
+        if settings.get('simplifiedAnswers', False):
+            system_prompt += " Provide simplified explanations suitable for beginners."
+        
+        if settings.get('stepByStepSolutions', True):
+            system_prompt += " Break down complex concepts into clear step-by-step explanations."
+        
+        # Generate the response
+        chat = model.start_chat(history=[])
+        gemini_response = chat.send_message([
+            {"text": system_prompt, "role": "model"},
+            {"text": question, "role": "user"}
+        ])
+        
+        content = gemini_response.text
+        
+        # Structure the response to match frontend expectations
+        response = {
+            'id': response_id,
+            'type': 'ai',
+            'content': content,
+            'timestamp': '',
+        }
+        
+        # Generate steps if the setting is enabled
+        if settings.get('stepByStepSolutions', True):
+            # Extract steps from the content - in a real implementation
+            # you might use more sophisticated parsing or ask the model directly for steps
+            steps = extract_steps_from_content(content)
+            if steps:
+                response['steps'] = steps
+        
+        # Add sources if the setting is enabled
+        if settings.get('showSources', True):
+            # In a real implementation, you'd retrieve actual sources
+            response['sources'] = [
+                {"title": "Generated by Gemini 1.5 Pro", "url": "https://ai.google.dev/", "description": "AI-generated content"}
+            ]
+            
+        return response
+        
+    except Exception as e:
+        print(f"Error with Gemini API: {e}")
+        # Fallback response
+        return {
+            'id': response_id,
+            'type': 'ai',
+            'content': f"I encountered an error while processing your request. Please try again later.",
+            'timestamp': '',
+        }
+
+def extract_steps_from_content(content):
+    """
+    Simple function to try to extract steps from the content
+    In a real implementation, you might use a more sophisticated approach
+    or directly ask the model to format its response with steps
+    """
+    lines = content.split('\n')
+    steps = []
     
-    # Apply settings
-    if settings.get('simplifiedAnswers', False):
-        # Make response more simplified
-        response['content'] = response['content'].split('.')[0] + '.'
-        
-    if not settings.get('stepByStepSolutions', True):
-        response.pop('steps', None)
-        
-    if not settings.get('showSources', True):
-        response.pop('sources', None)
-        
-    return response
+    for line in lines:
+        # Look for numbered lines or lines starting with common step indicators
+        if (line.strip().startswith(('1.', '2.', '3.', '4.', '5.', 'Step 1', 'Step 2', 'First', 'Second'))):
+            # Clean up the step text
+            step_text = line.strip().split('.', 1)[-1].strip()
+            if step_text and len(steps) < 5:  # Limit to 5 steps
+                steps.append(step_text)
+    
+    return steps
+
+def extract_text_from_pdf(file_path):
+    """
+    Extract text content from a PDF file
+    """
+    text = ""
+    try:
+        with open(file_path, 'rb') as file:
+            reader = PyPDF2.PdfReader(file)
+            for page_num in range(len(reader.pages)):
+                text += reader.pages[page_num].extract_text() + "\n"
+    except Exception as e:
+        print(f"Error extracting text from PDF: {e}")
+    return text
 
 def process_pdf(file_path, filename):
     """
     Process a PDF file to extract text
-    In a real implementation, this would use LangChain or similar
     """
     pdf_id = f"pdf-{os.urandom(4).hex()}"
-    # Here we would extract text, index it, etc.
+    # Extract the text content
+    text_content = extract_text_from_pdf(file_path)
+    
+    # Here we would store the text content for later use with RAG
+    # This is a simplified implementation
+    
     return pdf_id
 
 if __name__ == '__main__':

@@ -1,7 +1,7 @@
 
 # Study Spark Genie - Flask Backend
 
-This is the Flask backend for the Study Spark Genie application. It provides APIs for chat processing, PDF uploads, and conversation exports.
+This is the Flask backend for the Study Spark Genie application. It provides APIs for chat processing using Google's Gemini model, PDF uploads, and conversation exports.
 
 ## Setup
 
@@ -25,6 +25,10 @@ source venv/bin/activate
 pip install -r requirements.txt
 ```
 
+4. Set up Gemini API:
+- Replace the placeholder API key in app.py with your actual Gemini API key
+- You can get an API key from https://ai.google.dev/
+
 ## Running the Server
 
 ```bash
@@ -35,18 +39,17 @@ The server will run on http://localhost:5000
 
 ## API Endpoints
 
-- `POST /api/chat` - Process a chat message
+- `POST /api/chat` - Process a chat message using Gemini AI
 - `POST /api/upload` - Upload a PDF document
 - `POST /api/export` - Export a conversation
 
 ## Integration with Frontend
 
-The React frontend should make API calls to these endpoints. Make sure the frontend is configured to send requests to `http://localhost:5000`.
+The React frontend makes API calls to these endpoints. Make sure the frontend is configured to send requests to `http://localhost:5000`.
 
-## Adding AI Features
+## PDF Processing
 
-To implement the actual AI features:
-
-1. Uncomment the AI-related dependencies in `requirements.txt` and install them
-2. Set up API keys for services like Google Gemini or OpenAI
-3. Implement the real AI logic in the relevant functions
+The backend can extract text from uploaded PDFs. In a production environment, you would implement:
+- More sophisticated text extraction
+- Document chunking
+- RAG (Retrieval-Augmented Generation) using the extracted content
