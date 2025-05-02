@@ -4,6 +4,36 @@ import { Button } from '@/components/ui/button';
 import { Mic, MicOff } from 'lucide-react';
 import { toast } from "@/components/ui/sonner";
 
+// Add proper TypeScript interface for SpeechRecognition
+interface SpeechRecognitionEvent extends Event {
+  results: SpeechRecognitionResultList;
+}
+
+interface SpeechRecognitionError extends Event {
+  error: string;
+}
+
+// Properly type the SpeechRecognition class for TypeScript
+interface SpeechRecognitionType extends EventTarget {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onerror: (event: SpeechRecognitionError) => void;
+  onend: () => void;
+}
+
+// Define global window interface with the speech recognition properties
+declare global {
+  interface Window {
+    SpeechRecognition?: new () => SpeechRecognitionType;
+    webkitSpeechRecognition?: new () => SpeechRecognitionType;
+  }
+}
+
 interface VoiceInputProps {
   onVoiceInput: (text: string) => void;
   isEnabled: boolean;
@@ -11,32 +41,36 @@ interface VoiceInputProps {
 
 const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
   const [isListening, setIsListening] = useState(false);
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
 
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'SpeechRecognition' in window || 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = false;
+    if (typeof window !== 'undefined') {
+      // Use the correct way to access the SpeechRecognition API
+      const SpeechRecognitionAPI = window.SpeechRecognition || window.webkitSpeechRecognition;
       
-      recognitionInstance.onresult = (event) => {
-        const transcript = event.results[0][0].transcript;
-        onVoiceInput(transcript);
-        setIsListening(false);
-      };
-      
-      recognitionInstance.onerror = (event) => {
-        console.error('Speech recognition error', event.error);
-        toast.error("Failed to recognize speech. Please try again.");
-        setIsListening(false);
-      };
-      
-      recognitionInstance.onend = () => {
-        setIsListening(false);
-      };
-      
-      setRecognition(recognitionInstance);
+      if (SpeechRecognitionAPI) {
+        const recognitionInstance = new SpeechRecognitionAPI();
+        recognitionInstance.continuous = false;
+        recognitionInstance.interimResults = false;
+        
+        recognitionInstance.onresult = (event) => {
+          const transcript = event.results[0][0].transcript;
+          onVoiceInput(transcript);
+          setIsListening(false);
+        };
+        
+        recognitionInstance.onerror = (event) => {
+          console.error('Speech recognition error', event.error);
+          toast.error("Failed to recognize speech. Please try again.");
+          setIsListening(false);
+        };
+        
+        recognitionInstance.onend = () => {
+          setIsListening(false);
+        };
+        
+        setRecognition(recognitionInstance);
+      }
     }
     
     return () => {

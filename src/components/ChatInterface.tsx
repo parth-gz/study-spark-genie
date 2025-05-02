@@ -8,7 +8,7 @@ import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import MessageBubble from './MessageBubble';
 import PDFUploader from './PDFUploader';
 import VoiceInput from './VoiceInput';
-import { Send } from 'lucide-react';
+import { Send, Book } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 
 interface ChatInterfaceProps {
