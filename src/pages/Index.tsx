@@ -5,8 +5,8 @@ import ChatInterface from '@/components/ChatInterface';
 import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import { toast } from '@/components/ui/sonner';
 
-// API URLs for the Flask backend
-const API_URL = 'http://localhost:5000';
+// Use relative URLs which will work in any environment
+const API_URL = '/api'; // This will work both locally and in deployment
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -34,8 +34,9 @@ const Index = () => {
     setIsWaitingForResponse(true);
     
     try {
+      console.log("Sending request to:", API_URL + "/chat");
       // Make API call to Flask backend
-      const response = await fetch(`${API_URL}/api/chat`, {
+      const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -47,10 +48,11 @@ const Index = () => {
       });
       
       if (!response.ok) {
-        throw new Error('Failed to get response from server');
+        throw new Error(`Server responded with status: ${response.status}`);
       }
       
       const aiResponse = await response.json();
+      console.log("Received response:", aiResponse);
       
       // Add timestamp if not provided by backend
       if (!aiResponse.timestamp) {

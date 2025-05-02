@@ -1,4 +1,3 @@
-
 from flask import Flask, request, jsonify
 from flask_cors import CORS
 import os
@@ -6,11 +5,11 @@ import google.generativeai as genai
 import PyPDF2
 
 app = Flask(__name__)
-CORS(app)  # Enable CORS for all routes
+CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all routes with more specific configuration
 
-# Initialize Gemini API with placeholder API key
-# You'll replace "abcd" with your actual API key later
-gemini_api_key = "abcd"
+# Initialize Gemini API with your API key
+# Replace this with your actual API key or set it as an environment variable
+gemini_api_key = "abcd"  # You mentioned you would replace this with your key
 genai.configure(api_key=gemini_api_key)
 
 @app.route('/api/chat', methods=['POST'])
@@ -18,12 +17,16 @@ def chat():
     """
     Process a chat message and return an AI response using Gemini
     """
+    print("Received chat request")
     data = request.json
     user_message = data.get('message', '')
     settings = data.get('settings', {})
     
+    print(f"Processing message: {user_message}")
+    
     # Process with Gemini API
     response = get_gemini_response(user_message, settings)
+    print(f"Generated response: {response}")
     
     return jsonify(response)
 
@@ -82,6 +85,7 @@ def get_gemini_response(question, settings):
     response_id = f'ai-{os.urandom(4).hex()}'
     
     try:
+        print("Configuring Gemini model")
         # Configure the model based on settings
         model = genai.GenerativeModel('gemini-1.5-pro-latest')
         
@@ -94,6 +98,8 @@ def get_gemini_response(question, settings):
         if settings.get('stepByStepSolutions', True):
             system_prompt += " Break down complex concepts into clear step-by-step explanations."
         
+        print(f"Using system prompt: {system_prompt}")
+        
         # Generate the response
         chat = model.start_chat(history=[])
         gemini_response = chat.send_message([
@@ -102,6 +108,7 @@ def get_gemini_response(question, settings):
         ])
         
         content = gemini_response.text
+        print(f"Received content from Gemini: {content[:100]}...")  # Print first 100 chars for debug
         
         # Structure the response to match frontend expectations
         response = {
@@ -134,7 +141,7 @@ def get_gemini_response(question, settings):
         return {
             'id': response_id,
             'type': 'ai',
-            'content': f"I encountered an error while processing your request. Please try again later.",
+            'content': f"I encountered an error while processing your request. Error details: {str(e)}",
             'timestamp': '',
         }
 
@@ -185,4 +192,6 @@ def process_pdf(file_path, filename):
     return pdf_id
 
 if __name__ == '__main__':
-    app.run(debug=True, port=5000)
+    # Run on port 3001 to avoid conflicts with the frontend in development
+    print("Starting Flask server on port 3001")
+    app.run(debug=True, port=3001, host='0.0.0.0')

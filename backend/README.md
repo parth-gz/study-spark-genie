@@ -35,7 +35,7 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The server will run on http://localhost:5000
+The server will run on http://localhost:3001
 
 ## API Endpoints
 
@@ -43,13 +43,17 @@ The server will run on http://localhost:5000
 - `POST /api/upload` - Upload a PDF document
 - `POST /api/export` - Export a conversation
 
+## Deployment Notes
+
+For deployment in a production environment:
+1. Set up proper CORS policies for security
+2. Store the API key securely (environment variable or secret manager)
+3. Add authentication for API endpoints
+4. Configure a proper web server like Gunicorn or uWSGI to serve the Flask app
+
 ## Integration with Frontend
 
-The React frontend makes API calls to these endpoints. Make sure the frontend is configured to send requests to `http://localhost:5000`.
-
-## PDF Processing
-
-The backend can extract text from uploaded PDFs. In a production environment, you would implement:
-- More sophisticated text extraction
-- Document chunking
-- RAG (Retrieval-Augmented Generation) using the extracted content
+When deploying together:
+1. Configure your web server to serve the Flask app under the /api path
+2. Serve your React frontend from the root path
+3. This setup allows the frontend to make API calls to the backend using relative paths
