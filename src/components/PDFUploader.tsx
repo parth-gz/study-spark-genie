@@ -6,6 +6,9 @@ import { toast } from '@/components/ui/sonner';
 import { Upload, File, X } from 'lucide-react';
 import { PDFDocument } from '@/lib/types';
 
+// API URL for the Flask backend
+const API_URL = 'http://localhost:5000';
+
 interface PDFUploaderProps {
   onPDFsUploaded: (pdfs: PDFDocument[]) => void;
   uploadedPDFs: PDFDocument[];
@@ -13,6 +16,7 @@ interface PDFUploaderProps {
 
 const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs }) => {
   const [isDragging, setIsDragging] = useState(false);
+  const [isUploading, setIsUploading] = useState(false);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files) {
@@ -39,7 +43,7 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
     }
   };
 
-  const processFiles = (files: File[]) => {
+  const processFiles = async (files: File[]) => {
     const pdfFiles = files.filter(file => file.type === 'application/pdf');
     
     if (pdfFiles.length === 0) {
@@ -47,15 +51,37 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
       return;
     }
 
-    const newPDFs: PDFDocument[] = pdfFiles.map(file => ({
-      id: `pdf-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-      name: file.name,
-      size: file.size,
-      lastModified: file.lastModified
-    }));
-
-    onPDFsUploaded([...uploadedPDFs, ...newPDFs]);
-    toast.success(`${pdfFiles.length} PDF${pdfFiles.length !== 1 ? 's' : ''} uploaded successfully.`);
+    setIsUploading(true);
+    
+    try {
+      const newPDFs: PDFDocument[] = [];
+      
+      // Upload each PDF file to the backend
+      for (const file of pdfFiles) {
+        const formData = new FormData();
+        formData.append('file', file);
+        
+        const response = await fetch(`${API_URL}/api/upload`, {
+          method: 'POST',
+          body: formData,
+        });
+        
+        if (!response.ok) {
+          throw new Error(`Failed to upload ${file.name}`);
+        }
+        
+        const result = await response.json();
+        newPDFs.push(result);
+      }
+      
+      onPDFsUploaded([...uploadedPDFs, ...newPDFs]);
+      toast.success(`${pdfFiles.length} PDF${pdfFiles.length !== 1 ? 's' : ''} uploaded successfully.`);
+    } catch (error) {
+      console.error("Upload error:", error);
+      toast.error("Failed to upload one or more PDFs. Please try again.");
+    } finally {
+      setIsUploading(false);
+    }
   };
 
   const handleRemovePDF = (id: string) => {
@@ -92,12 +118,14 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
             id="pdf-upload"
             className="hidden"
             onChange={handleFileChange}
+            disabled={isUploading}
           />
           <Button
             variant="outline"
             onClick={() => document.getElementById('pdf-upload')?.click()}
+            disabled={isUploading}
           >
-            Browse Files
+            {isUploading ? 'Uploading...' : 'Browse Files'}
           </Button>
         </div>
       </div>
