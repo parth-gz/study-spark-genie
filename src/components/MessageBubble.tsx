@@ -3,6 +3,8 @@ import React from 'react';
 import { Message, Source } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 
 interface MessageBubbleProps {
   message: Message;
@@ -23,7 +25,37 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         isAI ? "bg-card" : "bg-study-primary text-white"
       )}>
         <CardContent className="p-4">
-          <p className="whitespace-pre-wrap">{message.content}</p>
+          <div className="prose prose-sm max-w-none dark:prose-invert">
+            <ReactMarkdown
+              remarkPlugins={[remarkGfm]}
+              components={{
+                // Override to maintain proper styling for links
+                a: ({ node, ...props }) => (
+                  <a 
+                    {...props} 
+                    className="text-study-primary hover:underline" 
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  />
+                ),
+                // Override to maintain proper styling for lists
+                ul: ({ node, ...props }) => <ul {...props} className="list-disc pl-6 my-2" />,
+                ol: ({ node, ...props }) => <ol {...props} className="list-decimal pl-6 my-2" />,
+                // Style code blocks and inline code
+                code: ({ node, inline, ...props }) => (
+                  <code 
+                    {...props} 
+                    className={cn(
+                      "text-xs font-mono",
+                      inline ? "bg-gray-100 rounded px-1 py-0.5" : "block bg-gray-100 p-2 rounded overflow-x-auto my-2"
+                    )} 
+                  />
+                ),
+              }}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
           
           {isAI && message.steps && message.steps.length > 0 && (
             <div className="mt-4 step-container">
@@ -32,7 +64,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 {message.steps.map((step, index) => (
                   <div key={index} className="flex gap-3 items-start">
                     <div className="step-item flex items-center justify-center w-6 h-6 rounded-full bg-study-light text-study-dark text-xs font-medium shrink-0" />
-                    <p className="text-sm">{step}</p>
+                    <div className="text-sm prose prose-sm">
+                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{step}</ReactMarkdown>
+                    </div>
                   </div>
                 ))}
               </div>
