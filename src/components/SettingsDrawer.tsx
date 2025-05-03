@@ -13,10 +13,11 @@ import {
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
-import { Settings } from "lucide-react";
+import { Settings, Moon, Sun } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SUPPORTED_LANGUAGES, SettingsState } from '@/lib/types';
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { useTheme } from '@/hooks/use-theme';
 
 interface SettingsDrawerProps {
   settings: SettingsState;
@@ -24,6 +25,8 @@ interface SettingsDrawerProps {
 }
 
 const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ settings, onSettingsChange }) => {
+  const { theme, setTheme } = useTheme();
+  
   return (
     <Drawer>
       <DrawerTrigger asChild>
@@ -42,6 +45,19 @@ const SettingsDrawer: React.FC<SettingsDrawerProps> = ({ settings, onSettingsCha
           </DrawerHeader>
           <div className="px-4 py-2 space-y-6">
             <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <Label htmlFor="theme-toggle" className="text-base">Theme</Label>
+                <div className="flex items-center space-x-2">
+                  <Sun className="h-4 w-4" />
+                  <Switch
+                    id="theme-toggle"
+                    checked={theme === "dark"}
+                    onCheckedChange={(checked) => setTheme(checked ? "dark" : "light")}
+                  />
+                  <Moon className="h-4 w-4" />
+                </div>
+              </div>
+
               <div>
                 <Label htmlFor="language" className="text-base">Language</Label>
                 <Select
