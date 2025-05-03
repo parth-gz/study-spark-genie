@@ -92,6 +92,7 @@ const Index = () => {
           settings={settings}
           onPDFsUploaded={handlePDFUpload}
           uploadedPDFs={uploadedPDFs}
+          isWaitingForResponse={isWaitingForResponse}
         />
       </div>
     </div>

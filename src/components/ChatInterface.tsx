@@ -1,3 +1,4 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -7,8 +8,9 @@ import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import MessageBubble from './MessageBubble';
 import PDFUploader from './PDFUploader';
 import VoiceInput from './VoiceInput';
-import { Send, Book } from 'lucide-react';
+import { Send, Book, RefreshCw } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
+import { Skeleton } from '@/components/ui/skeleton';
 
 interface ChatInterfaceProps {
   messages: Message[];
@@ -16,6 +18,7 @@ interface ChatInterfaceProps {
   settings: SettingsState;
   onPDFsUploaded: (pdfs: PDFDocument[]) => void;
   uploadedPDFs: PDFDocument[];
+  isWaitingForResponse?: boolean;
 }
 
 const ChatInterface: React.FC<ChatInterfaceProps> = ({
@@ -24,6 +27,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   settings,
   onPDFsUploaded,
   uploadedPDFs,
+  isWaitingForResponse = false,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [activeTab, setActiveTab] = useState<string>('chat');
@@ -107,6 +111,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 {messages.map((message) => (
                   <MessageBubble key={message.id} message={message} />
                 ))}
+                
+                {/* Loading indicator for AI response */}
+                {isWaitingForResponse && (
+                  <div className="self-start max-w-[85%] mb-4 animate-fade-in">
+                    <Card className="bg-card border shadow-sm">
+                      <CardContent className="p-4">
+                        <div className="flex items-center space-x-2">
+                          <RefreshCw className="h-5 w-5 animate-spin text-study-primary" />
+                          <span>Thinking...</span>
+                        </div>
+                        <div className="mt-3 space-y-2">
+                          <Skeleton className="h-4 w-3/4" />
+                          <Skeleton className="h-4 w-5/6" />
+                          <Skeleton className="h-4 w-2/3" />
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </div>
+                )}
+                
                 <div ref={messagesEndRef} />
               </div>
             )}
@@ -120,9 +144,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   className="flex-grow"
+                  disabled={isWaitingForResponse}
                 />
                 <VoiceInput onVoiceInput={handleVoiceInput} isEnabled={settings.voiceEnabled} />
-                <Button type="submit" size="icon">
+                <Button type="submit" size="icon" disabled={isWaitingForResponse}>
                   <Send className="h-5 w-5" />
                 </Button>
               </form>
