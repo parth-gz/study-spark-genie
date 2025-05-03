@@ -66,14 +66,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-full">
       <Tabs
         defaultValue="chat"
         className="flex-grow flex flex-col"
         value={activeTab}
         onValueChange={setActiveTab}
       >
-        <div className="px-4 pt-2 border-b">
+        <div className="px-4 pt-2 border-b sticky top-0 bg-background z-10">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="chat">Chat</TabsTrigger>
             <TabsTrigger value="resources">Upload Resources</TabsTrigger>
