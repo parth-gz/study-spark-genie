@@ -1,3 +1,4 @@
+
 #root {
   max-width: 1280px;
   margin: 0 auto;
@@ -56,4 +57,10 @@ html, body, #root {
 .chat-scroll-container {
   height: calc(100vh - 220px); /* Adjust this value depending on your header/input size */
   overflow-y: auto;
+}
+
+/* Dark mode styles for specific elements */
+.dark .sonner-toast {
+  background-color: hsl(var(--card));
+  color: hsl(var(--card-foreground));
 }

@@ -8,6 +8,7 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 import { ThemeProvider } from "./hooks/use-theme";
+import "./App.css";
 
 // Create a new QueryClient instance
 const queryClient = new QueryClient();
@@ -16,10 +17,10 @@ const queryClient = new QueryClient();
 const App: React.FC = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <ThemeProvider defaultTheme="light">
+      <ThemeProvider defaultTheme="system">
         <TooltipProvider>
           <Toaster />
-          <Sonner />
+          <Sonner theme="system" />
           <BrowserRouter>
             <Routes>
               <Route path="/" element={<Index />} />

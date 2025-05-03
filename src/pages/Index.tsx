@@ -79,7 +79,7 @@ const Index = () => {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-50">
+    <div className="flex flex-col h-screen bg-background">
       <StudyHeader 
         messages={messages} 
         settings={settings} 

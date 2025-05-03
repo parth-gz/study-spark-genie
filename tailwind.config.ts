@@ -96,6 +96,38 @@ export default {
         DEFAULT: {
           css: {
             maxWidth: '100%',
+            color: 'hsl(var(--foreground))',
+            a: {
+              color: 'hsl(var(--primary))',
+              '&:hover': {
+                color: 'hsl(var(--primary))',
+              },
+            },
+            h1: {
+              color: 'hsl(var(--foreground))',
+            },
+            h2: {
+              color: 'hsl(var(--foreground))',
+            },
+            h3: {
+              color: 'hsl(var(--foreground))',
+            },
+            h4: {
+              color: 'hsl(var(--foreground))',
+            },
+            code: {
+              color: 'hsl(var(--foreground))',
+            },
+            blockquote: {
+              color: 'hsl(var(--foreground))',
+              borderColor: 'hsl(var(--border))',
+            },
+            hr: {
+              borderColor: 'hsl(var(--border))',
+            },
+            pre: {
+              backgroundColor: 'hsl(var(--muted))',
+            },
           },
         },
       },

@@ -90,12 +90,12 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <div className="max-w-md">
                   <Book className="w-12 h-12 text-study-primary mx-auto mb-4 animate-bounce-subtle" />
                   <h3 className="text-xl font-semibold mb-2">Welcome to Study Spark Genie!</h3>
-                  <p className={`text-gray-500 mb-6 ${getFontSizeClass()}`}>
+                  <p className={`text-muted-foreground mb-6 ${getFontSizeClass()}`}>
                     Ask any academic question and get step-by-step answers with sources. Upload study materials for
                     more personalized responses.
                   </p>
                   <div className="space-y-3">
-                    <div className="bg-gray-50 rounded-lg p-3 text-left dark:bg-gray-800">
+                    <div className="bg-muted rounded-lg p-3 text-left dark:bg-muted">
                       <p className="font-medium text-study-primary">Try asking:</p>
                       <ul className={`mt-2 space-y-1 ${getFontSizeClass()}`}>
                         <li>"Explain photosynthesis in simple terms"</li>
