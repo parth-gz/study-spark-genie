@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Message, Source } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
@@ -41,16 +40,23 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                 // Override to maintain proper styling for lists
                 ul: ({ node, ...props }) => <ul {...props} className="list-disc pl-6 my-2" />,
                 ol: ({ node, ...props }) => <ol {...props} className="list-decimal pl-6 my-2" />,
-                // Style code blocks and inline code
-                code: ({ node, inline, ...props }) => (
-                  <code 
-                    {...props} 
-                    className={cn(
-                      "text-xs font-mono",
-                      inline ? "bg-gray-100 rounded px-1 py-0.5" : "block bg-gray-100 p-2 rounded overflow-x-auto my-2"
-                    )} 
-                  />
-                ),
+                // Style code blocks and inline code - fixed the inline prop issue
+                code: ({ node, className, children, ...props }) => {
+                  const match = /language-(\w+)/.exec(className || '');
+                  const isInline = !match && !className?.includes('block');
+                  
+                  return (
+                    <code 
+                      {...props} 
+                      className={cn(
+                        "text-xs font-mono",
+                        isInline ? "bg-gray-100 rounded px-1 py-0.5" : "block bg-gray-100 p-2 rounded overflow-x-auto my-2"
+                      )} 
+                    >
+                      {children}
+                    </code>
+                  );
+                },
               }}
             >
               {message.content}
