@@ -3,13 +3,15 @@ from flask_cors import CORS
 import os
 import google.generativeai as genai
 import PyPDF2
+from dotenv import load_dotenv
+load_dotenv()
 
 app = Flask(__name__)
 CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all routes with more specific configuration
 
 # Initialize Gemini API with your API key
 # Replace this with your actual API key or set it as an environment variable
-gemini_api_key = "abcd"  # You mentioned you would replace this with your key
+gemini_api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=gemini_api_key)
 
 @app.route('/api/chat', methods=['POST'])
