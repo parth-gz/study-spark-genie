@@ -1,4 +1,3 @@
-
 import React, { useState, useRef, useEffect } from 'react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
@@ -19,12 +18,12 @@ interface ChatInterfaceProps {
   uploadedPDFs: PDFDocument[];
 }
 
-const ChatInterface: React.FC<ChatInterfaceProps> = ({ 
-  messages, 
-  onSendMessage, 
-  settings, 
-  onPDFsUploaded, 
-  uploadedPDFs 
+const ChatInterface: React.FC<ChatInterfaceProps> = ({
+  messages,
+  onSendMessage,
+  settings,
+  onPDFsUploaded,
+  uploadedPDFs,
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [activeTab, setActiveTab] = useState<string>('chat');
@@ -48,23 +47,26 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 
   const handleVoiceInput = (text: string) => {
     setInputValue(text);
-    toast.info("Voice input captured! Send your message or continue editing.");
+    toast.info('Voice input captured! Send your message or continue editing.');
   };
 
   const getFontSizeClass = () => {
     switch (settings.fontSize) {
-      case 'small': return 'text-sm';
-      case 'large': return 'text-lg';
-      default: return 'text-base';
+      case 'small':
+        return 'text-sm';
+      case 'large':
+        return 'text-lg';
+      default:
+        return 'text-base';
     }
   };
 
   return (
-    <div className="flex flex-col h-full">
-      <Tabs 
-        defaultValue="chat" 
-        className="flex-grow flex flex-col" 
-        value={activeTab} 
+    <div className="flex flex-col h-screen">
+      <Tabs
+        defaultValue="chat"
+        className="flex-grow flex flex-col"
+        value={activeTab}
         onValueChange={setActiveTab}
       >
         <div className="px-4 pt-2 border-b">
@@ -74,16 +76,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
           </TabsList>
         </div>
 
-        <TabsContent value="chat" className="flex-grow flex flex-col mt-0 p-0">
-          <div className={`flex-grow overflow-y-auto p-4 chat-container ${getFontSizeClass()}`}>
+        <TabsContent value="chat" className="flex-grow flex flex-col mt-0 p-0 overflow-hidden">
+          <div
+            className={`flex-grow overflow-y-auto px-4 py-2 ${getFontSizeClass()}`}
+            style={{ maxHeight: 'calc(100vh - 230px)' }}
+          >
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-4">
                 <div className="max-w-md">
                   <Book className="w-12 h-12 text-study-primary mx-auto mb-4 animate-bounce-subtle" />
                   <h3 className="text-xl font-semibold mb-2">Welcome to Study Spark Genie!</h3>
                   <p className="text-gray-500 mb-6">
-                    Ask any academic question and get step-by-step answers with 
-                    sources. Upload study materials for more personalized responses.
+                    Ask any academic question and get step-by-step answers with sources. Upload study materials for
+                    more personalized responses.
                   </p>
                   <div className="space-y-3">
                     <div className="bg-gray-50 rounded-lg p-3 text-left">
@@ -128,10 +133,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         <TabsContent value="resources" className="flex-grow mt-0 p-4">
           <Card>
             <CardContent className="pt-6">
-              <PDFUploader
-                onPDFsUploaded={onPDFsUploaded}
-                uploadedPDFs={uploadedPDFs}
-              />
+              <PDFUploader onPDFsUploaded={onPDFsUploaded} uploadedPDFs={uploadedPDFs} />
             </CardContent>
           </Card>
         </TabsContent>

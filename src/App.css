@@ -40,3 +40,20 @@
 .read-the-docs {
   color: #888;
 }
+
+html, body, #root {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+.chat-container {
+  max-height: calc(100vh - 12rem); /* adjusts for header + input area */
+  overflow-y: auto;
+}
+
+/* Add at the end of App.css if not present already */
+.chat-scroll-container {
+  height: calc(100vh - 220px); /* Adjust this value depending on your header/input size */
+  overflow-y: auto;
+}
