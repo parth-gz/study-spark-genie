@@ -23,7 +23,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
         "border shadow-sm", 
         isAI ? "bg-card" : "bg-study-primary text-white"
       )}>
-        <CardContent className="p-4">
+        <CardContent className="p-4 text-left">
           <div className="prose prose-sm max-w-none dark:prose-invert">
             <ReactMarkdown
               remarkPlugins={[remarkGfm]}
