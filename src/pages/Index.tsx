@@ -5,8 +5,8 @@ import ChatInterface from '@/components/ChatInterface';
 import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import { toast } from '@/components/ui/sonner';
 
-// Use relative URLs which will work in any environment
-const API_URL = '/api'; // This will work both locally and in deployment
+// API URL for backend
+const API_URL = 'http://localhost:5000/api';
 
 const Index = () => {
   const [messages, setMessages] = useState<Message[]>([]);
@@ -21,7 +21,7 @@ const Index = () => {
   });
   const [isWaitingForResponse, setIsWaitingForResponse] = useState(false);
 
-  const handleSendMessage = async (content: string) => {
+  const handleSendMessage = async (content: string, pdfIds?: string[]) => {
     // Add user message to chat
     const userMessage: Message = {
       id: `user-${Date.now()}`,
@@ -35,6 +35,8 @@ const Index = () => {
     
     try {
       console.log("Sending request to:", API_URL + "/chat");
+      console.log("With PDFs:", pdfIds);
+      
       // Make API call to Flask backend
       const response = await fetch(`${API_URL}/chat`, {
         method: 'POST',
@@ -43,7 +45,8 @@ const Index = () => {
         },
         body: JSON.stringify({
           message: content,
-          settings: settings
+          settings: settings,
+          pdfIds: pdfIds || []
         }),
       });
       
@@ -73,9 +76,15 @@ const Index = () => {
   };
 
   const handlePDFUpload = async (pdfs: PDFDocument[]) => {
-    // In a real implementation, this would upload files to the backend
-    // For now, we'll just update the state
     setUploadedPDFs(pdfs);
+    
+    if (pdfs.length > 0 && messages.length === 0) {
+      // If this is the first PDF upload and no messages yet, show a helpful toast
+      toast.success(
+        "PDF uploaded successfully! Ask questions about your document for contextualized answers.",
+        { duration: 5000 }
+      );
+    }
   };
 
   return (

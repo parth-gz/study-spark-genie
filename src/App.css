@@ -1,66 +1,13 @@
 
-#root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-}
-
-.logo {
-  height: 6em;
-  padding: 1.5em;
-  will-change: filter;
-  transition: filter 300ms;
-}
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
+@keyframes bounce-subtle {
+  0%, 100% {
+    transform: translateY(0);
   }
-  to {
-    transform: rotate(360deg);
+  50% {
+    transform: translateY(-10px);
   }
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  a:nth-of-type(2) .logo {
-    animation: logo-spin infinite 20s linear;
-  }
-}
-
-.card {
-  padding: 2em;
-}
-
-.read-the-docs {
-  color: #888;
-}
-
-html, body, #root {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-}
-
-.chat-container {
-  max-height: calc(100vh - 12rem); /* adjusts for header + input area */
-  overflow-y: auto;
-}
-
-/* Add at the end of App.css if not present already */
-.chat-scroll-container {
-  height: calc(100vh - 220px); /* Adjust this value depending on your header/input size */
-  overflow-y: auto;
-}
-
-/* Dark mode styles for specific elements */
-.dark .sonner-toast {
-  background-color: hsl(var(--card));
-  color: hsl(var(--card-foreground));
+.animate-bounce-subtle {
+  animation: bounce-subtle 2s ease-in-out infinite;
 }

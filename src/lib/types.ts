@@ -8,6 +8,7 @@ export interface Message {
   steps?: string[];
   sources?: Source[];
   timestamp: Date;
+  relatedPdfIds?: string[]; // Add this to track which PDFs a message is related to
 }
 
 export interface Source {

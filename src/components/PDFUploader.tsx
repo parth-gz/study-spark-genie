@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from '@/components/ui/sonner';
 import { Upload, File, X } from 'lucide-react';
 import { PDFDocument } from '@/lib/types';
+import { formatFileSize } from '@/lib/utils';
 
 // API URL for the Flask backend
 const API_URL = 'http://localhost:5000';
@@ -89,17 +90,11 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
     onPDFsUploaded(updatedPDFs);
   };
 
-  const formatFileSize = (bytes: number) => {
-    if (bytes < 1024) return bytes + ' bytes';
-    else if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-    else return (bytes / 1048576).toFixed(1) + ' MB';
-  };
-
   return (
     <div className="w-full space-y-4">
       <div
         className={`border-2 border-dashed rounded-lg p-6 text-center transition-colors ${
-          isDragging ? 'border-study-primary bg-study-light/10' : 'border-gray-300'
+          isDragging ? 'border-study-primary bg-study-light/10' : 'border-gray-300 dark:border-gray-700'
         }`}
         onDragOver={handleDragOver}
         onDragLeave={handleDragLeave}
@@ -107,8 +102,8 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
       >
         <div className="flex flex-col items-center justify-center space-y-2">
           <Upload className="w-8 h-8 text-study-primary mb-2" />
-          <h3 className="text-lg font-medium">Upload PDF files</h3>
-          <p className="text-sm text-gray-500 mb-2">
+          <h3 className="text-lg font-medium">Upload Study Materials</h3>
+          <p className="text-sm text-muted-foreground mb-2">
             Drag and drop your PDFs here, or click to browse
           </p>
           <Input
@@ -132,18 +127,18 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
 
       {uploadedPDFs.length > 0 && (
         <div className="space-y-2">
-          <h4 className="text-sm font-medium">Uploaded PDFs:</h4>
+          <h4 className="text-sm font-medium">Uploaded Study Materials:</h4>
           <div className="max-h-40 overflow-y-auto space-y-2 pr-1">
             {uploadedPDFs.map((pdf) => (
               <div
                 key={pdf.id}
-                className="bg-gray-50 rounded-lg p-3 flex items-center justify-between text-sm"
+                className="bg-muted dark:bg-muted/50 rounded-lg p-3 flex items-center justify-between text-sm"
               >
                 <div className="flex items-center space-x-3">
                   <File className="w-4 h-4 text-study-primary" />
                   <div>
                     <p className="font-medium truncate max-w-[12rem]">{pdf.name}</p>
-                    <p className="text-xs text-gray-500">{formatFileSize(pdf.size)}</p>
+                    <p className="text-xs text-gray-500 dark:text-gray-400">{formatFileSize(pdf.size)}</p>
                   </div>
                 </div>
                 <Button

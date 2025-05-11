@@ -8,13 +8,14 @@ import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import MessageBubble from './MessageBubble';
 import PDFUploader from './PDFUploader';
 import VoiceInput from './VoiceInput';
-import { Send, Book, RefreshCw } from 'lucide-react';
+import { Send, Book, RefreshCw, FileText } from 'lucide-react';
 import { toast } from '@/components/ui/sonner';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Badge } from '@/components/ui/badge';
 
 interface ChatInterfaceProps {
   messages: Message[];
-  onSendMessage: (content: string) => void;
+  onSendMessage: (content: string, pdfIds?: string[]) => void;
   settings: SettingsState;
   onPDFsUploaded: (pdfs: PDFDocument[]) => void;
   uploadedPDFs: PDFDocument[];
@@ -31,11 +32,19 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
 }) => {
   const [inputValue, setInputValue] = useState('');
   const [activeTab, setActiveTab] = useState<string>('chat');
+  const [selectedPDFs, setSelectedPDFs] = useState<string[]>([]);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  // Auto-select all uploaded PDFs for context
+  useEffect(() => {
+    if (uploadedPDFs.length > 0) {
+      setSelectedPDFs(uploadedPDFs.map(pdf => pdf.id));
+    }
+  }, [uploadedPDFs]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -45,7 +54,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
     e.preventDefault();
     if (inputValue.trim() === '') return;
 
-    onSendMessage(inputValue.trim());
+    onSendMessage(inputValue.trim(), selectedPDFs);
     setInputValue('');
   };
 
@@ -63,6 +72,14 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
       default:
         return 'text-base';
     }
+  };
+
+  const togglePdfSelection = (pdfId: string) => {
+    setSelectedPDFs(prev => 
+      prev.includes(pdfId) 
+        ? prev.filter(id => id !== pdfId)
+        : [...prev, pdfId]
+    );
   };
 
   return (
@@ -85,6 +102,35 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             className={`flex-grow overflow-y-auto px-4 py-2 ${getFontSizeClass()}`}
             style={{ maxHeight: 'calc(100vh - 230px)' }}
           >
+            {uploadedPDFs.length > 0 && (
+              <div className="mb-4 p-3 bg-muted/30 rounded-lg border border-border">
+                <div className="flex items-center justify-between mb-2">
+                  <h3 className="text-sm font-medium">Study Materials</h3>
+                  <Button 
+                    variant="ghost" 
+                    size="sm"
+                    onClick={() => setActiveTab('resources')}
+                    className="text-xs h-7"
+                  >
+                    Manage
+                  </Button>
+                </div>
+                <div className="flex flex-wrap gap-2">
+                  {uploadedPDFs.map(pdf => (
+                    <Badge 
+                      key={pdf.id} 
+                      variant={selectedPDFs.includes(pdf.id) ? "default" : "outline"} 
+                      className="cursor-pointer flex items-center gap-1"
+                      onClick={() => togglePdfSelection(pdf.id)}
+                    >
+                      <FileText className="h-3 w-3" />
+                      <span className="truncate max-w-40">{pdf.name}</span>
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {messages.length === 0 ? (
               <div className="h-full flex flex-col items-center justify-center text-center p-4">
                 <div className="max-w-md">
@@ -140,7 +186,10 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             <CardContent className="p-3">
               <form onSubmit={handleSubmit} className="flex items-center gap-2">
                 <Input
-                  placeholder="Ask any academic question..."
+                  placeholder={uploadedPDFs.length > 0 
+                    ? "Ask about your study materials or any academic question..." 
+                    : "Ask any academic question..."
+                  }
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   className="flex-grow"

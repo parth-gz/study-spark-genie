@@ -1,9 +1,11 @@
+
 import React from 'react';
 import { Message, Source } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
 import { cn } from '@/lib/utils';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
+import { FileText } from 'lucide-react';
 
 interface MessageBubbleProps {
   message: Message;
@@ -11,6 +13,12 @@ interface MessageBubbleProps {
 
 const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
   const isAI = message.type === 'ai';
+
+  // Check if this message is related to a PDF source
+  const hasPdfSources = isAI && message.sources?.some(source => 
+    source.title === 'Uploaded PDF Documents' || 
+    source.title.includes('PDF')
+  );
 
   return (
     <div 
@@ -21,7 +29,8 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
     >
       <Card className={cn(
         "border shadow-sm", 
-        isAI ? "bg-card" : "bg-study-primary text-white"
+        isAI ? "bg-card" : "bg-study-primary text-white",
+        hasPdfSources && "border-study-primary/30"
       )}>
         <CardContent className="p-4 text-left">
           <div className="prose prose-sm max-w-none dark:prose-invert">
@@ -50,7 +59,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
                       {...props} 
                       className={cn(
                         "text-xs font-mono",
-                        isInline ? "bg-gray-100 rounded px-1 py-0.5" : "block bg-gray-100 p-2 rounded overflow-x-auto my-2"
+                        isInline ? "bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5" : "block bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto my-2"
                       )} 
                     >
                       {children}
@@ -69,7 +78,9 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
               <div className="space-y-2 pl-2">
                 {message.steps.map((step, index) => (
                   <div key={index} className="flex gap-3 items-start">
-                    <div className="step-item flex items-center justify-center w-6 h-6 rounded-full bg-study-light text-study-dark text-xs font-medium shrink-0" />
+                    <div className="step-item flex items-center justify-center w-6 h-6 rounded-full bg-study-light text-study-dark text-xs font-medium shrink-0">
+                      {index + 1}
+                    </div>
                     <div className="text-sm prose prose-sm">
                       <ReactMarkdown remarkPlugins={[remarkGfm]}>{step}</ReactMarkdown>
                     </div>
@@ -80,29 +91,28 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
           )}
 
           {isAI && message.sources && message.sources.length > 0 && (
-            <div className="mt-4 border-t pt-3 border-gray-100">
+            <div className="mt-4 border-t pt-3 border-gray-100 dark:border-gray-800">
               <h4 className="text-sm font-semibold mb-2">Sources:</h4>
-              <ul className="space-y-1 text-xs text-gray-600">
+              <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
                 {message.sources.map((source, index) => (
-                  <li key={index} className="flex items-start gap-1">
-                    <span className="font-semibold">{index + 1}.</span>
-                    <span>
-                      {source.url ? (
+                  <li key={index} className="flex items-start gap-2">
+                    {source.title.includes('PDF') && <FileText className="h-3.5 w-3.5 text-study-primary flex-shrink-0 mt-0.5" />}
+                    <div>
+                      <span className="font-semibold">{source.title}</span>
+                      {source.url && (
                         <a 
                           href={source.url} 
                           target="_blank" 
                           rel="noopener noreferrer"
-                          className="text-study-primary hover:underline"
+                          className="text-study-primary hover:underline block"
                         >
-                          {source.title}
+                          {source.url}
                         </a>
-                      ) : (
-                        <span>{source.title}</span>
                       )}
                       {source.description && (
-                        <span className="block text-gray-500">{source.description}</span>
+                        <span className="block text-gray-500 dark:text-gray-400">{source.description}</span>
                       )}
-                    </span>
+                    </div>
                   </li>
                 ))}
               </ul>
