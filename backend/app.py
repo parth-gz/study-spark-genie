@@ -18,6 +18,9 @@ CORS(app, resources={r"/api/*": {"origins": "*"}})  # Enable CORS for all routes
 gemini_api_key = os.getenv("GEMINI_API_KEY")
 genai.configure(api_key=gemini_api_key)
 
+# Create temp_uploads directory if it doesn't exist
+os.makedirs('temp_uploads', exist_ok=True)
+
 # Storage for uploaded PDFs data (in-memory for demo)
 # In a production app, this would be a database
 pdf_storage = {}
@@ -64,30 +67,40 @@ def upload_pdf():
         return jsonify({'error': 'No selected file'}), 400
         
     if file and file.filename.endswith('.pdf'):
-        # Save file temporarily
-        filename = file.filename
-        file_path = os.path.join('temp_uploads', filename)
-        os.makedirs('temp_uploads', exist_ok=True)
-        file.save(file_path)
-        
-        # Extract text from PDF
-        pdf_text = extract_text_from_pdf(file_path)
-        pdf_id = f"pdf-{str(uuid.uuid4())[:8]}"
-        
-        # Store PDF content for later use
-        pdf_storage[pdf_id] = {
-            'name': filename,
-            'content': pdf_text,
-            'size': os.path.getsize(file_path),
-            'lastModified': os.path.getmtime(file_path)
-        }
-        
-        return jsonify({
-            'id': pdf_id,
-            'name': filename,
-            'size': os.path.getsize(file_path),
-            'lastModified': os.path.getmtime(file_path)
-        })
+        try:
+            # Save file temporarily
+            filename = file.filename
+            file_path = os.path.join('temp_uploads', filename)
+            
+            print(f"Saving file to {file_path}")
+            file.save(file_path)
+            
+            # Extract text from PDF
+            pdf_text = extract_text_from_pdf(file_path)
+            if not pdf_text:
+                return jsonify({'error': 'Could not extract text from PDF'}), 400
+                
+            pdf_id = f"pdf-{str(uuid.uuid4())[:8]}"
+            
+            # Store PDF content for later use
+            pdf_storage[pdf_id] = {
+                'name': filename,
+                'content': pdf_text,
+                'size': os.path.getsize(file_path),
+                'lastModified': os.path.getmtime(file_path)
+            }
+            
+            print(f"Successfully processed PDF with ID: {pdf_id}")
+            
+            return jsonify({
+                'id': pdf_id,
+                'name': filename,
+                'size': os.path.getsize(file_path),
+                'lastModified': os.path.getmtime(file_path)
+            })
+        except Exception as e:
+            print(f"Error processing PDF: {str(e)}")
+            return jsonify({'error': f'Error processing PDF: {str(e)}'}), 500
     
     return jsonify({'error': 'File must be a PDF'}), 400
 
@@ -218,9 +231,14 @@ def extract_text_from_pdf(file_path):
             reader = PyPDF2.PdfReader(file)
             for page_num in range(len(reader.pages)):
                 text += reader.pages[page_num].extract_text() + "\n"
+                
+        if not text.strip():
+            print(f"Warning: No text extracted from {file_path}")
+            
+        return text
     except Exception as e:
         print(f"Error extracting text from PDF: {e}")
-    return text
+        return ""
 
 if __name__ == '__main__':
     # Run on port 5000 as expected by frontend

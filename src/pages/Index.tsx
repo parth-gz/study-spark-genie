@@ -5,7 +5,7 @@ import ChatInterface from '@/components/ChatInterface';
 import { Message, PDFDocument, SettingsState } from '@/lib/types';
 import { toast } from '@/components/ui/sonner';
 
-// API URL for backend
+// API URL for backend - updated to match Flask server port
 const API_URL = 'http://localhost:5000/api';
 
 const Index = () => {

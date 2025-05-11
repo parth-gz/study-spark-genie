@@ -7,7 +7,7 @@ import { Upload, File, X } from 'lucide-react';
 import { PDFDocument } from '@/lib/types';
 import { formatFileSize } from '@/lib/utils';
 
-// API URL for the Flask backend
+// API URL for the Flask backend - updated to match the Flask server port
 const API_URL = 'http://localhost:5000';
 
 interface PDFUploaderProps {
@@ -56,27 +56,42 @@ const PDFUploader: React.FC<PDFUploaderProps> = ({ onPDFsUploaded, uploadedPDFs 
     
     try {
       const newPDFs: PDFDocument[] = [];
+      const failedUploads: string[] = [];
       
       // Upload each PDF file to the backend
       for (const file of pdfFiles) {
-        const formData = new FormData();
-        formData.append('file', file);
-        
-        const response = await fetch(`${API_URL}/api/upload`, {
-          method: 'POST',
-          body: formData,
-        });
-        
-        if (!response.ok) {
-          throw new Error(`Failed to upload ${file.name}`);
+        try {
+          const formData = new FormData();
+          formData.append('file', file);
+          
+          console.log(`Uploading ${file.name} to ${API_URL}/api/upload`);
+          
+          const response = await fetch(`${API_URL}/api/upload`, {
+            method: 'POST',
+            body: formData,
+          });
+          
+          if (!response.ok) {
+            throw new Error(`Failed to upload ${file.name}: ${response.status} ${response.statusText}`);
+          }
+          
+          const result = await response.json();
+          newPDFs.push(result);
+          console.log(`Successfully uploaded: ${file.name}`, result);
+        } catch (error) {
+          console.error(`Error uploading ${file.name}:`, error);
+          failedUploads.push(file.name);
         }
-        
-        const result = await response.json();
-        newPDFs.push(result);
       }
       
-      onPDFsUploaded([...uploadedPDFs, ...newPDFs]);
-      toast.success(`${pdfFiles.length} PDF${pdfFiles.length !== 1 ? 's' : ''} uploaded successfully.`);
+      if (newPDFs.length > 0) {
+        onPDFsUploaded([...uploadedPDFs, ...newPDFs]);
+        toast.success(`${newPDFs.length} PDF${newPDFs.length !== 1 ? 's' : ''} uploaded successfully.`);
+      }
+      
+      if (failedUploads.length > 0) {
+        toast.error(`Failed to upload: ${failedUploads.join(', ')}`);
+      }
     } catch (error) {
       console.error("Upload error:", error);
       toast.error("Failed to upload one or more PDFs. Please try again.");
