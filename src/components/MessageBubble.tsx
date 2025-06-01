@@ -91,7 +91,7 @@ const MessageBubble: React.FC<MessageBubbleProps> = ({ message, settings }) => {
                 <div className="flex flex-wrap gap-1">
                   {message.sources.map((source, index) => (
                     <Badge key={index} variant="outline" className="text-xs">
-                      {source}
+                      {typeof source === 'string' ? source : source.title || source.url || 'Unknown Source'}
                     </Badge>
                   ))}
                 </div>
