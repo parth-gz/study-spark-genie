@@ -66,7 +66,8 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       fontFamily: {
-        sans: ["var(--font-sans)", ...fontFamily.sans],
+        sans: ["Inter", ...fontFamily.sans],
+        inter: ["Inter", "sans-serif"],
       },
       keyframes: {
         "accordion-down": {
@@ -97,6 +98,7 @@ export default {
           css: {
             maxWidth: '100%',
             color: 'hsl(var(--foreground))',
+            fontFamily: 'Inter, sans-serif',
             a: {
               color: 'hsl(var(--primary))',
               '&:hover': {
@@ -105,18 +107,23 @@ export default {
             },
             h1: {
               color: 'hsl(var(--foreground))',
+              fontFamily: 'Inter, sans-serif',
             },
             h2: {
               color: 'hsl(var(--foreground))',
+              fontFamily: 'Inter, sans-serif',
             },
             h3: {
               color: 'hsl(var(--foreground))',
+              fontFamily: 'Inter, sans-serif',
             },
             h4: {
               color: 'hsl(var(--foreground))',
+              fontFamily: 'Inter, sans-serif',
             },
             code: {
               color: 'hsl(var(--foreground))',
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             },
             blockquote: {
               color: 'hsl(var(--foreground))',
@@ -127,6 +134,7 @@ export default {
             },
             pre: {
               backgroundColor: 'hsl(var(--muted))',
+              fontFamily: 'ui-monospace, SFMono-Regular, "SF Mono", Monaco, Consolas, "Liberation Mono", "Courier New", monospace',
             },
           },
         },
