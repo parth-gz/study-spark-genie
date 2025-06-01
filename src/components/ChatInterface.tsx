@@ -59,8 +59,17 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
   };
 
   const handleVoiceInput = (text: string) => {
-    setInputValue(text);
-    toast.info('Voice input captured! Send your message or continue editing.');
+    if (text.trim()) {
+      // Auto-submit voice input or set it for review
+      setInputValue(text);
+      // Optionally auto-submit after voice input
+      setTimeout(() => {
+        if (text.trim()) {
+          onSendMessage(text.trim(), selectedPDFs);
+          setInputValue('');
+        }
+      }, 1000);
+    }
   };
 
   const getFontSizeClass = () => {
@@ -80,6 +89,23 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
         ? prev.filter(id => id !== pdfId)
         : [...prev, pdfId]
     );
+  };
+
+  // Get language code for voice components
+  const getLanguageCode = () => {
+    const languageMap: { [key: string]: string } = {
+      'English': 'en-US',
+      'Spanish': 'es-ES',
+      'French': 'fr-FR',
+      'German': 'de-DE',
+      'Italian': 'it-IT',
+      'Portuguese': 'pt-PT',
+      'Dutch': 'nl-NL',
+      'Russian': 'ru-RU',
+      'Chinese': 'zh-CN',
+      'Japanese': 'ja-JP',
+    };
+    return languageMap[settings.language] || 'en-US';
   };
 
   return (
@@ -137,7 +163,7 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                   <Book className="w-12 h-12 text-study-primary mx-auto mb-4 animate-bounce-subtle" />
                   <h3 className="text-xl font-semibold mb-2">Welcome to Study Spark Genie!</h3>
                   <p className={`text-muted-foreground mb-6 ${getFontSizeClass()}`}>
-                    Ask any academic question and get step-by-step answers with sources. Upload study materials for
+                    Ask any academic question using text or voice and get step-by-step answers with sources. Upload study materials for
                     more personalized responses.
                   </p>
                   <div className="space-y-3">
@@ -155,7 +181,11 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
             ) : (
               <div className="flex flex-col">
                 {messages.map((message) => (
-                  <MessageBubble key={message.id} message={message} />
+                  <MessageBubble 
+                    key={message.id} 
+                    message={message} 
+                    settings={settings}
+                  />
                 ))}
                 
                 {/* Loading indicator for AI response */}
@@ -188,14 +218,18 @@ const ChatInterface: React.FC<ChatInterfaceProps> = ({
                 <Input
                   placeholder={uploadedPDFs.length > 0 
                     ? "Ask about your study materials or any academic question..." 
-                    : "Ask any academic question..."
+                    : "Ask any academic question or use voice input..."
                   }
                   value={inputValue}
                   onChange={(e) => setInputValue(e.target.value)}
                   className="flex-grow"
                   disabled={isWaitingForResponse}
                 />
-                <VoiceInput onVoiceInput={handleVoiceInput} isEnabled={settings.voiceEnabled} />
+                <VoiceInput 
+                  onVoiceInput={handleVoiceInput} 
+                  isEnabled={settings.voiceEnabled}
+                  language={getLanguageCode()}
+                />
                 <Button type="submit" size="icon" disabled={isWaitingForResponse}>
                   <Send className="h-5 w-5" />
                 </Button>

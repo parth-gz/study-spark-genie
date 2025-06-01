@@ -1,127 +1,108 @@
 
 import React from 'react';
-import { Message, Source } from '@/lib/types';
 import { Card, CardContent } from '@/components/ui/card';
-import { cn } from '@/lib/utils';
+import { Badge } from '@/components/ui/badge';
+import { Message } from '@/lib/types';
+import { Bot, User, FileText } from 'lucide-react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
-import { FileText } from 'lucide-react';
+import VoiceOutput from './VoiceOutput';
 
 interface MessageBubbleProps {
   message: Message;
+  settings?: {
+    voiceEnabled?: boolean;
+    language?: string;
+    fontSize?: string;
+  };
 }
 
-const MessageBubble: React.FC<MessageBubbleProps> = ({ message }) => {
-  const isAI = message.type === 'ai';
-
-  // Check if this message is related to a PDF source
-  const hasPdfSources = isAI && message.sources?.some(source => 
-    source.title === 'Uploaded PDF Documents' || 
-    source.title.includes('PDF')
-  );
+const MessageBubble: React.FC<MessageBubbleProps> = ({ message, settings }) => {
+  const isUser = message.type === 'user';
+  const getFontSizeClass = () => {
+    switch (settings?.fontSize) {
+      case 'small':
+        return 'text-sm';
+      case 'large':
+        return 'text-lg';
+      default:
+        return 'text-base';
+    }
+  };
 
   return (
-    <div 
-      className={cn(
-        "mb-4 max-w-[85%] animate-fade-in",
-        isAI ? "self-start" : "self-end"
-      )}
-    >
-      <Card className={cn(
-        "border shadow-sm", 
-        isAI ? "bg-card" : "bg-study-primary text-white",
-        hasPdfSources && "border-study-primary/30"
-      )}>
-        <CardContent className="p-4 text-left">
-          <div className="prose prose-sm max-w-none dark:prose-invert">
-            <ReactMarkdown
-              remarkPlugins={[remarkGfm]}
-              components={{
-                // Override to maintain proper styling for links
-                a: ({ node, ...props }) => (
-                  <a 
-                    {...props} 
-                    className="text-study-primary hover:underline" 
-                    target="_blank"
-                    rel="noopener noreferrer"
-                  />
-                ),
-                // Override to maintain proper styling for lists
-                ul: ({ node, ...props }) => <ul {...props} className="list-disc pl-6 my-2" />,
-                ol: ({ node, ...props }) => <ol {...props} className="list-decimal pl-6 my-2" />,
-                // Style code blocks and inline code - fixed the inline prop issue
-                code: ({ node, className, children, ...props }) => {
-                  const match = /language-(\w+)/.exec(className || '');
-                  const isInline = !match && !className?.includes('block');
-                  
-                  return (
-                    <code 
-                      {...props} 
-                      className={cn(
-                        "text-xs font-mono",
-                        isInline ? "bg-gray-100 dark:bg-gray-800 rounded px-1 py-0.5" : "block bg-gray-100 dark:bg-gray-800 p-2 rounded overflow-x-auto my-2"
-                      )} 
-                    >
-                      {children}
-                    </code>
-                  );
-                },
-              }}
-            >
-              {message.content}
-            </ReactMarkdown>
-          </div>
-          
-          {isAI && message.steps && message.steps.length > 0 && (
-            <div className="mt-4 step-container">
-              <h4 className="text-sm font-semibold mb-2">Step-by-step Solution:</h4>
-              <div className="space-y-2 pl-2">
-                {message.steps.map((step, index) => (
-                  <div key={index} className="flex gap-3 items-start">
-                    <div className="step-item flex items-center justify-center w-6 h-6 rounded-full bg-study-light text-study-dark text-xs font-medium shrink-0">
-                      {index + 1}
-                    </div>
-                    <div className="text-sm prose prose-sm">
-                      <ReactMarkdown remarkPlugins={[remarkGfm]}>{step}</ReactMarkdown>
-                    </div>
-                  </div>
-                ))}
+    <div className={`flex mb-4 ${isUser ? 'justify-end' : 'justify-start'}`}>
+      <div className={`flex gap-3 max-w-[85%] ${isUser ? 'flex-row-reverse' : 'flex-row'}`}>
+        <div className={`flex-shrink-0 w-8 h-8 rounded-full flex items-center justify-center ${
+          isUser ? 'bg-study-primary text-white' : 'bg-muted'
+        }`}>
+          {isUser ? <User className="w-4 h-4" /> : <Bot className="w-4 h-4" />}
+        </div>
+        
+        <Card className={`shadow-sm ${isUser ? 'bg-study-primary text-white' : 'bg-card'}`}>
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between gap-2">
+              <div className={`flex-grow ${getFontSizeClass()}`}>
+                {isUser ? (
+                  <p className="whitespace-pre-wrap">{message.content}</p>
+                ) : (
+                  <ReactMarkdown 
+                    className="prose prose-sm max-w-none dark:prose-invert"
+                    remarkPlugins={[remarkGfm]}
+                    components={{
+                      p: ({ children }) => <p className="mb-2 last:mb-0">{children}</p>,
+                      ul: ({ children }) => <ul className="list-disc pl-4 mb-2">{children}</ul>,
+                      ol: ({ children }) => <ol className="list-decimal pl-4 mb-2">{children}</ol>,
+                      li: ({ children }) => <li className="mb-1">{children}</li>,
+                      strong: ({ children }) => <strong className="font-semibold">{children}</strong>,
+                      code: ({ children }) => (
+                        <code className="bg-muted px-1 py-0.5 rounded text-sm font-mono">
+                          {children}
+                        </code>
+                      ),
+                      pre: ({ children }) => (
+                        <pre className="bg-muted p-3 rounded-lg overflow-x-auto text-sm font-mono mb-2">
+                          {children}
+                        </pre>
+                      ),
+                    }}
+                  >
+                    {message.content}
+                  </ReactMarkdown>
+                )}
               </div>
+              
+              {!isUser && settings?.voiceEnabled && (
+                <VoiceOutput 
+                  text={message.content}
+                  isEnabled={settings.voiceEnabled}
+                  language={settings.language || 'en-US'}
+                  autoPlay={false}
+                />
+              )}
             </div>
-          )}
-
-          {isAI && message.sources && message.sources.length > 0 && (
-            <div className="mt-4 border-t pt-3 border-gray-100 dark:border-gray-800">
-              <h4 className="text-sm font-semibold mb-2">Sources:</h4>
-              <ul className="space-y-1 text-xs text-gray-600 dark:text-gray-400">
-                {message.sources.map((source, index) => (
-                  <li key={index} className="flex items-start gap-2">
-                    {source.title.includes('PDF') && <FileText className="h-3.5 w-3.5 text-study-primary flex-shrink-0 mt-0.5" />}
-                    <div>
-                      <span className="font-semibold">{source.title}</span>
-                      {source.url && (
-                        <a 
-                          href={source.url} 
-                          target="_blank" 
-                          rel="noopener noreferrer"
-                          className="text-study-primary hover:underline block"
-                        >
-                          {source.url}
-                        </a>
-                      )}
-                      {source.description && (
-                        <span className="block text-gray-500 dark:text-gray-400">{source.description}</span>
-                      )}
-                    </div>
-                  </li>
-                ))}
-              </ul>
+            
+            {message.sources && message.sources.length > 0 && (
+              <div className="mt-3 pt-3 border-t border-border/50">
+                <p className="text-sm font-medium mb-2 flex items-center gap-1">
+                  <FileText className="w-4 h-4" />
+                  Sources:
+                </p>
+                <div className="flex flex-wrap gap-1">
+                  {message.sources.map((source, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {source}
+                    </Badge>
+                  ))}
+                </div>
+              </div>
+            )}
+            
+            <div className="mt-2 text-xs opacity-70">
+              {new Date(message.timestamp).toLocaleTimeString()}
             </div>
-          )}
-        </CardContent>
-      </Card>
-      <div className="text-xs text-gray-500 mt-1 px-1">
-        {new Date(message.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+          </CardContent>
+        </Card>
       </div>
     </div>
   );

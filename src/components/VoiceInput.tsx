@@ -37,9 +37,10 @@ declare global {
 interface VoiceInputProps {
   onVoiceInput: (text: string) => void;
   isEnabled: boolean;
+  language?: string;
 }
 
-const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
+const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled, language = 'en-US' }) => {
   const [isListening, setIsListening] = useState(false);
   const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
 
@@ -52,11 +53,13 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
         const recognitionInstance = new SpeechRecognitionAPI();
         recognitionInstance.continuous = false;
         recognitionInstance.interimResults = false;
+        recognitionInstance.lang = language;
         
         recognitionInstance.onresult = (event) => {
           const transcript = event.results[0][0].transcript;
           onVoiceInput(transcript);
           setIsListening(false);
+          toast.success("Voice input captured!");
         };
         
         recognitionInstance.onerror = (event) => {
@@ -78,7 +81,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
         recognition.abort();
       }
     };
-  }, [onVoiceInput]);
+  }, [onVoiceInput, language]);
 
   const toggleListening = () => {
     if (!recognition) {
@@ -92,8 +95,10 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
       setIsListening(true);
       try {
         recognition.start();
+        toast.info("Listening... Speak your question now.");
       } catch (error) {
         console.error('Speech recognition start error:', error);
+        setIsListening(false);
       }
     }
   };
@@ -104,7 +109,7 @@ const VoiceInput: React.FC<VoiceInputProps> = ({ onVoiceInput, isEnabled }) => {
     <Button
       variant="ghost"
       size="icon"
-      className={`rounded-full transition-all ${isListening ? 'bg-study-primary text-white' : ''}`}
+      className={`rounded-full transition-all ${isListening ? 'bg-study-primary text-white animate-pulse' : ''}`}
       onClick={toggleListening}
       title={isListening ? 'Stop listening' : 'Start voice input'}
     >
