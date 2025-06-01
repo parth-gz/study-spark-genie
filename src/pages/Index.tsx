@@ -79,10 +79,10 @@ const Index = () => {
     setUploadedPDFs(pdfs);
     
     if (pdfs.length > 0 && messages.length === 0) {
-      // If this is the first PDF upload and no messages yet, show a helpful toast
+      // Reduce duration to 2 seconds so it doesn't block the mic button
       toast.success(
         "PDF uploaded successfully! Ask questions about your document for contextualized answers.",
-        { duration: 5000 }
+        { duration: 2000 }
       );
     }
   };
