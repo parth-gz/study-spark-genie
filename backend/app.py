@@ -129,7 +129,7 @@ def get_gemini_response(question, context, settings):
 
         # Configure the Gemini model with system instruction
         model = genai.GenerativeModel(
-            model_name='gemini-1.5-pro-latest',
+            model_name='gemini-1.5-flash-latest',
             system_instruction=system_instruction
         )
 
