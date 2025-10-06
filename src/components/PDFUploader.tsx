@@ -8,7 +8,7 @@ import { PDFDocument } from '@/lib/types';
 import { formatFileSize } from '@/lib/utils';
 
 // API URL for the Flask backend - updated to match the Flask server port
-const API_URL = 'http://localhost:5000';
+const API_URL = 'study-spark-genie-backend.onrender.com';
 
 interface PDFUploaderProps {
   onPDFsUploaded: (pdfs: PDFDocument[]) => void;

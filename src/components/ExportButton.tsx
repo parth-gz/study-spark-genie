@@ -6,7 +6,7 @@ import { Download } from 'lucide-react';
 import { Message } from '@/lib/types';
 
 // API URL for the Flask backend
-const API_URL = 'http://localhost:5000';
+const API_URL = 'study-spark-genie-backend.onrender.com';
 
 interface ExportButtonProps {
   messages: Message[];
