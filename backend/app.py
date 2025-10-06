@@ -14,7 +14,7 @@ from langchain.chains import LLMChain
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": ["https://study-spark-genie.vercel.app"]}})
+CORS(app, resources={r"/api/*": {"origins": "*"}})
 
 # Initialize Gemini model via LangChain
 gemini_api_key = os.getenv("GEMINI_API_KEY")
@@ -180,10 +180,10 @@ def extract_text_from_pdf(file_path):
         print(f"Error reading PDF: {e}")
         return ""
 
+@app.route("/healthz", methods=["GET"])
+def health_check():
+    return jsonify({"status": "ok"}), 200
 
 if __name__ == "__main__":
     print("Running Flask backend with LangChain integration...")
     app.run(debug=True, host="0.0.0.0", port=5000)
-@app.route("/healthz", methods=["GET"])
-def health_check():
-    return jsonify({"status": "ok"}), 200
