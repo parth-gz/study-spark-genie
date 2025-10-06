@@ -184,3 +184,6 @@ def extract_text_from_pdf(file_path):
 if __name__ == "__main__":
     print("Running Flask backend with LangChain integration...")
     app.run(debug=True, host="0.0.0.0", port=5000)
+@app.route("/healthz", methods=["GET"])
+def health_check():
+    return jsonify({"status": "ok"}), 200
