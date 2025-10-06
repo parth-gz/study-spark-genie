@@ -1,59 +1,71 @@
+# ⚡ Study Spark Genie — AI-Powered Academic Assistant
 
-# Study Spark Genie - Flask Backend
+> An intelligent study companion that answers academic questions, explains concepts step-by-step, and learns from your uploaded study materials.
 
-This is the Flask backend for the Study Spark Genie application. It provides APIs for chat processing using Google's Gemini model, PDF uploads, and conversation exports.
+Built with **React + Vite (frontend)** and **Flask + LangChain + Gemini (backend)**, this app combines a modern UI with advanced AI reasoning.
 
-## Setup
+---
 
-1. Create a virtual environment:
+## 🧠 Overview
+
+**Study Spark Genie** helps students and learners:
+- Ask academic or technical questions via text or voice.
+- Upload study materials (PDFs) to get context-aware answers.
+- Receive simplified or detailed explanations as needed.
+- Listen to AI-generated voice responses.
+- Export full conversations for later study.
+
+---
+
+## 🧩 Tech Stack
+
+| Layer | Technologies |
+|-------|---------------|
+| **Frontend** | React, Vite, TypeScript, Tailwind CSS, shadcn/ui |
+| **Backend** | Flask, LangChain, Google Gemini API |
+| **AI Layer** | LangChain + Gemini 1.5 Flash (via `langchain-google-genai`) |
+| **PDF Processing** | PyPDF2 |
+| **Voice Features** | Web Speech API (Browser-based) |
+
+
+---
+
+## ⚙️ Setup Instructions
+
+### 🔹 1. Clone the Repository
+
 ```bash
+git clone <YOUR_REPO_URL>
+cd parth-gz-study-spark-genie
+```
+
+### 🔹 2. Backend Setup (Flask + LangChain)
+
+```bash
+cd backend
 python -m venv venv
-```
-
-2. Activate the virtual environment:
-- On Windows:
-```bash
+#activate the virtual environment
+#for windows
 venv\Scripts\activate
-```
-- On macOS/Linux:
-```bash
+#for MAc/Linux
 source venv/bin/activate
-```
 
-3. Install dependencies:
-```bash
+#install dependencies 
 pip install -r requirements.txt
 ```
-
-4. Set up Gemini API:
-- Replace the placeholder API key in app.py with your actual Gemini API key
-- You can get an API key from https://ai.google.dev/
-
-## Running the Server
-
+###🔹 3. Add Your Gemini API Key
+create a .env file in the backend/ folder:
+```bash
+GEMINI_API_KEY=your_google_gemini_api_key_here
+```
+###🔹 4. Run the Backend Server
 ```bash
 python app.py
 ```
+###🔹 5. Frontend Setup (React + Vite)
+```bash
+cd ../
+npm i
+npm run dev
+```
 
-The server will run on http://localhost:3001
-
-## API Endpoints
-
-- `POST /api/chat` - Process a chat message using Gemini AI
-- `POST /api/upload` - Upload a PDF document
-- `POST /api/export` - Export a conversation
-
-## Deployment Notes
-
-For deployment in a production environment:
-1. Set up proper CORS policies for security
-2. Store the API key securely (environment variable or secret manager)
-3. Add authentication for API endpoints
-4. Configure a proper web server like Gunicorn or uWSGI to serve the Flask app
-
-## Integration with Frontend
-
-When deploying together:
-1. Configure your web server to serve the Flask app under the /api path
-2. Serve your React frontend from the root path
-3. This setup allows the frontend to make API calls to the backend using relative paths
