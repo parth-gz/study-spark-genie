@@ -14,7 +14,7 @@ from langchain.chains import LLMChain
 load_dotenv()
 
 app = Flask(__name__)
-CORS(app, resources={r"/api/*": {"origins": "*"}})
+CORS(app, resources={r"/api/*": {"origins": ["https://study-spark-genie.vercel.app"]}})
 
 # Initialize Gemini model via LangChain
 gemini_api_key = os.getenv("GEMINI_API_KEY")
