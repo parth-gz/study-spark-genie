@@ -6,7 +6,7 @@ import { Download } from 'lucide-react';
 import { Message } from '@/lib/types';
 
 // API URL for the Flask backend
-const API_URL = 'https://study-spark-genie-backend.onrender.com';
+const API_URL = import.meta.env.VITE_API_URL;
 
 interface ExportButtonProps {
   messages: Message[];
