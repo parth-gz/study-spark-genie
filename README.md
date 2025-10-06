@@ -35,8 +35,8 @@ Built with **React + Vite (frontend)** and **Flask + LangChain + Gemini (backend
 ### 🔹 1. Clone the Repository
 
 ```bash
-git clone <YOUR_REPO_URL>
-cd parth-gz-study-spark-genie
+git clone https://github.com/parth-gz/study-spark-genie
+cd study-spark-genie
 ```
 
 ### 🔹 2. Backend Setup (Flask + LangChain)
